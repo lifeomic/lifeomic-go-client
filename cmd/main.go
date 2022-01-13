@@ -35,7 +35,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	client, err := alpha.BuildAlphaClient("lifeomic-dev", "lifeomic", args.User, map[string]bool{})
+	client, err := alpha.BuildAlphaClient("lifeomic", args.User, map[string]bool{})
 	if err != nil {
 		log.Fatal(err)
 	}
