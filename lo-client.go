@@ -34,14 +34,18 @@ type responseBody struct {
 	} `json:"errors"`
 }
 
+type Invoker interface {
+	Invoke(context.Context, *lambda.InvokeInput, ...func(*lambda.Options)) (*lambda.InvokeOutput, error)
+}
+
 type Client struct {
-	c       *lambda.Client
+	c       Invoker
 	account string
 	user    string
 	rules   map[string]bool
 }
 
-func (client *Client) build_gql_query(path string, query string, variables map[string]interface{}) []byte {
+func (client *Client) buildGqlQuery(path string, query string, variables map[string]interface{}) []byte {
 	type Body struct {
 		Query     string                 `json:"query"`
 		Variables map[string]interface{} `json:"variables"`
@@ -82,7 +86,7 @@ func (client *Client) Gql(uri string, query string, variables map[string]interfa
 	// MP_ARN := "marketplace-service:deployed"
 	resp, err := client.c.Invoke(context.Background(), &lambda.InvokeInput{
 		FunctionName: functionName,
-		Payload:      client.build_gql_query(*path, query, variables),
+		Payload:      client.buildGqlQuery(*path, query, variables),
 	})
 
 	if err != nil {
