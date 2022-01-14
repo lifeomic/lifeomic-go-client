@@ -91,8 +91,8 @@ func (client *Alpha) Gql(uri string, query string, variables map[string]interfac
 	return &body.Data, nil
 }
 
-func BuildAlphaClient(env string, account string, user string, rules map[string]bool) (*Alpha, error) {
-	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithSharedConfigProfile(env))
+func BuildAlphaClient(account string, user string, rules map[string]bool) (*Alpha, error) {
+	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		return nil, err
 	}
