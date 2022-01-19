@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
@@ -40,7 +41,7 @@ type Alpha struct {
 	rules   map[string]bool
 }
 
-func (client *Alpha) build_gql_query(query string, variables map[string]interface{}) []byte {
+func (client *Alpha) build_gql_query(path string, query string, variables map[string]interface{}) []byte {
 	type Body struct {
 		Query     string                 `json:"query"`
 		Variables map[string]interface{} `json:"variables"`
@@ -53,7 +54,7 @@ func (client *Alpha) build_gql_query(query string, variables map[string]interfac
 		Headers:               map[string]string{"LifeOmic-Account": client.account, "LifeOmic-User": client.user, "content-type": "application/json", "LifeOmic-Policy": string(policy)},
 		HttpMethod:            "POST",
 		QueryStringParameters: map[string]string{},
-		Path:                  "/v1/marketplace/authenticated/graphql",
+		Path:                  path,
 		Body:                  string(body),
 	}
 	bytes, err := json.Marshal(payload)
@@ -63,11 +64,25 @@ func (client *Alpha) build_gql_query(query string, variables map[string]interfac
 	return bytes
 }
 
+func parseUri(uri string) (*string, *string, error) {
+	index := strings.IndexAny(uri, "/")
+	if index == -1 {
+		return nil, nil, errors.New("Invalid URL provided")
+	}
+	functionName := uri[0:index]
+	path := uri[index:]
+	return &functionName, &path, nil
+}
+
 func (client *Alpha) Gql(uri string, query string, variables map[string]interface{}) (*map[string]interface{}, error) {
+	functionName, path, err := parseUri(uri)
+	if err != nil {
+		return nil, err
+	}
 	// MP_ARN := "marketplace-service:deployed"
 	resp, err := client.c.Invoke(context.Background(), &lambda.InvokeInput{
-		FunctionName: &uri,
-		Payload:      client.build_gql_query(query, variables),
+		FunctionName: functionName,
+		Payload:      client.build_gql_query(*path, query, variables),
 	})
 
 	if err != nil {
@@ -85,7 +100,6 @@ func (client *Alpha) Gql(uri string, query string, variables map[string]interfac
 		return nil, err
 	}
 	if len(body.Errors) > 0 {
-		log.Println("test")
 		return nil, errors.New(body.Errors[0].Message)
 	}
 	return &body.Data, nil
