@@ -1,4 +1,4 @@
-module github.com/lifeomic/alpha-go
+module github.com/lifeomic/lifeomic-go-client
 
 go 1.17
 
