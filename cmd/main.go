@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/alexflint/go-arg"
-	"github.com/lifeomic/alpha-go"
+	"github.com/lifeomic/lifeomic-go-client"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -35,7 +35,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	client, err := alpha.BuildAlphaClient("lifeomic", args.User, map[string]bool{})
+	client, err := lo_client.BuildClient("lifeomic", args.User, map[string]bool{})
 	if err != nil {
 		log.Fatal(err)
 	}

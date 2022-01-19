@@ -1,4 +1,4 @@
-package alpha
+package lo_client
 
 import (
 	"context"
@@ -34,14 +34,14 @@ type responseBody struct {
 	} `json:"errors"`
 }
 
-type Alpha struct {
+type Client struct {
 	c       *lambda.Client
 	account string
 	user    string
 	rules   map[string]bool
 }
 
-func (client *Alpha) build_gql_query(path string, query string, variables map[string]interface{}) []byte {
+func (client *Client) build_gql_query(path string, query string, variables map[string]interface{}) []byte {
 	type Body struct {
 		Query     string                 `json:"query"`
 		Variables map[string]interface{} `json:"variables"`
@@ -74,7 +74,7 @@ func parseUri(uri string) (*string, *string, error) {
 	return &functionName, &path, nil
 }
 
-func (client *Alpha) Gql(uri string, query string, variables map[string]interface{}) (*map[string]interface{}, error) {
+func (client *Client) Gql(uri string, query string, variables map[string]interface{}) (*map[string]interface{}, error) {
 	functionName, path, err := parseUri(uri)
 	if err != nil {
 		return nil, err
@@ -105,11 +105,11 @@ func (client *Alpha) Gql(uri string, query string, variables map[string]interfac
 	return &body.Data, nil
 }
 
-func BuildAlphaClient(account string, user string, rules map[string]bool) (*Alpha, error) {
+func BuildClient(account string, user string, rules map[string]bool) (*Client, error) {
 	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		return nil, err
 	}
-	client := Alpha{c: lambda.NewFromConfig(cfg), user: user, rules: rules, account: account}
+	client := Client{c: lambda.NewFromConfig(cfg), user: user, rules: rules, account: account}
 	return &client, nil
 }
