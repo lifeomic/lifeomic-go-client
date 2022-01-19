@@ -1,4 +1,4 @@
-package lo_client
+package client
 
 import (
 	"context"
@@ -39,23 +39,23 @@ type Invoker interface {
 }
 
 type Client struct {
-	c       Invoker
+	invoker Invoker
 	account string
 	user    string
 	rules   map[string]bool
 }
 
-func (client *Client) buildGqlQuery(path string, query string, variables map[string]interface{}) []byte {
+func (c *Client) buildGqlQuery(path string, query string, variables map[string]interface{}) []byte {
 	type Body struct {
 		Query     string                 `json:"query"`
 		Variables map[string]interface{} `json:"variables"`
 	}
 	policy, _ := json.Marshal(&policy{
-		Rules: client.rules,
+		Rules: c.rules,
 	})
 	body, _ := json.Marshal(&Body{Query: query, Variables: variables})
 	payload := &payload{
-		Headers:               map[string]string{"LifeOmic-Account": client.account, "LifeOmic-User": client.user, "content-type": "application/json", "LifeOmic-Policy": string(policy)},
+		Headers:               map[string]string{"LifeOmic-Account": c.account, "LifeOmic-User": c.user, "content-type": "application/json", "LifeOmic-Policy": string(policy)},
 		HttpMethod:            "POST",
 		QueryStringParameters: map[string]string{},
 		Path:                  path,
@@ -78,15 +78,15 @@ func parseUri(uri string) (*string, *string, error) {
 	return &functionName, &path, nil
 }
 
-func (client *Client) Gql(uri string, query string, variables map[string]interface{}) (*map[string]interface{}, error) {
+func (c *Client) Gql(uri string, query string, variables map[string]interface{}) (*map[string]interface{}, error) {
 	functionName, path, err := parseUri(uri)
 	if err != nil {
 		return nil, err
 	}
 	// MP_ARN := "marketplace-service:deployed"
-	resp, err := client.c.Invoke(context.Background(), &lambda.InvokeInput{
+	resp, err := c.invoker.Invoke(context.Background(), &lambda.InvokeInput{
 		FunctionName: functionName,
-		Payload:      client.buildGqlQuery(*path, query, variables),
+		Payload:      c.buildGqlQuery(*path, query, variables),
 	})
 
 	if err != nil {
@@ -114,6 +114,6 @@ func BuildClient(account string, user string, rules map[string]bool) (*Client, e
 	if err != nil {
 		return nil, err
 	}
-	client := Client{c: lambda.NewFromConfig(cfg), user: user, rules: rules, account: account}
+	client := Client{invoker: lambda.NewFromConfig(cfg), user: user, rules: rules, account: account}
 	return &client, nil
 }

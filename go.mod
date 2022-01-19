@@ -1,4 +1,4 @@
-module github.com/lifeomic/lifeomic-go-client
+module github.com/lifeomic/phc-sdk-go
 
 go 1.17
 
