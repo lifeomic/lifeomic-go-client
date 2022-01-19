@@ -8,5 +8,5 @@ See `cmds/main.go` for example usage.
 To run example do something like this:
 
 ```
-go run cmd/main.go --query=query.graphql --variables=var.json --uri=marketplace-service:deployed --user=marketplace-tf
+go run cmd/main.go --query=query.graphql --variables=var.json --uri=marketplace-service:deployed/v1/marketplace/authenticated/graphql --user=marketplace-tf
 ```
