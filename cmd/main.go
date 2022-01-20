@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/alexflint/go-arg"
-	"github.com/lifeomic/lifeomic-go-client"
+	"github.com/lifeomic/phc-sdk-go/client"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -35,12 +35,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	client, err := lo_client.BuildClient("lifeomic", args.User, map[string]bool{})
+	phcClient, err := client.BuildClient("lifeomic", args.User, map[string]bool{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	resp, err := client.Gql(args.Uri, string(query), variables)
+	resp, err := phcClient.Gql(args.Uri, string(query), variables)
 	if err != nil {
 		log.Fatal(err)
 	}

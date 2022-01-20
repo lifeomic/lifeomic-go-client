@@ -1,4 +1,4 @@
-package lo_client
+package client
 
 import (
 	"context"
@@ -77,7 +77,7 @@ func TestGql(t *testing.T) {
 		},
 	}
 	client := Client{
-		c: &mock,
+		invoker: &mock,
 	}
 
 	vars := map[string]interface{}{
