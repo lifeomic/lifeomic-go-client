@@ -44,9 +44,7 @@ const GRAPHQL_URL = "/graphql"
 
 type AppStoreClient struct {
 	graphqlUrl string
-	client     interface {
-		Gql(string, string, map[string]interface{}) (*map[string]interface{}, error)
-	}
+	client     graphqlClient
 }
 
 type app struct {

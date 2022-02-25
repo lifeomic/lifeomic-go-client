@@ -13,9 +13,7 @@ import (
 
 type MarketplaceClient struct {
 	graphqlUrl string
-	client     interface {
-		Gql(string, string, map[string]interface{}) (*map[string]interface{}, error)
-	}
+	client     graphqlClient
 }
 
 func (self *MarketplaceClient) Gql(query string, variables map[string]interface{}) (*map[string]interface{}, error) {

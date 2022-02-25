@@ -34,10 +34,12 @@ type responseBody struct {
 	} `json:"errors"`
 }
 
+type Invoker interface {
+	Invoke(context.Context, *lambda.InvokeInput, ...func(*lambda.Options)) (*lambda.InvokeOutput, error)
+}
+
 type LambdaClient struct {
-	invoker interface {
-		Invoke(context.Context, *lambda.InvokeInput, ...func(*lambda.Options)) (*lambda.InvokeOutput, error)
-	}
+	invoker Invoker
 	account string
 	user    string
 	rules   map[string]bool
