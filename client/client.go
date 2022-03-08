@@ -38,14 +38,14 @@ type Invoker interface {
 	Invoke(context.Context, *lambda.InvokeInput, ...func(*lambda.Options)) (*lambda.InvokeOutput, error)
 }
 
-type Client struct {
+type LambdaClient struct {
 	invoker Invoker
 	account string
 	user    string
 	rules   map[string]bool
 }
 
-func (c *Client) buildGqlQuery(path string, query string, variables map[string]interface{}) []byte {
+func (c *LambdaClient) buildGqlQuery(path string, query string, variables map[string]interface{}) []byte {
 	type Body struct {
 		Query     string                 `json:"query"`
 		Variables map[string]interface{} `json:"variables"`
@@ -78,12 +78,11 @@ func parseUri(uri string) (*string, *string, error) {
 	return &functionName, &path, nil
 }
 
-func (c *Client) Gql(uri string, query string, variables map[string]interface{}) (*map[string]interface{}, error) {
+func (c *LambdaClient) Gql(uri string, query string, variables map[string]interface{}) (*map[string]interface{}, error) {
 	functionName, path, err := parseUri(uri)
 	if err != nil {
 		return nil, err
 	}
-	// MP_ARN := "marketplace-service:deployed"
 	resp, err := c.invoker.Invoke(context.Background(), &lambda.InvokeInput{
 		FunctionName: functionName,
 		Payload:      c.buildGqlQuery(*path, query, variables),
@@ -109,11 +108,25 @@ func (c *Client) Gql(uri string, query string, variables map[string]interface{})
 	return &body.Data, nil
 }
 
-func BuildClient(account string, user string, rules map[string]bool) (*Client, error) {
+func (c *LambdaClient) AppStore() AppStoreClient {
+	return AppStoreClient{
+		client:     c,
+		graphqlUrl: "app-store-service:deployed/graphql",
+	}
+}
+
+func (c *LambdaClient) Marketplace() MarketplaceClient {
+	return MarketplaceClient{
+		client:     c,
+		graphqlUrl: "marketplace-service:deployed/v1/marketplace/authenticated/graphql",
+	}
+}
+
+func BuildClient(account string, user string, rules map[string]bool) (*LambdaClient, error) {
 	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		return nil, err
 	}
-	client := Client{invoker: lambda.NewFromConfig(cfg), user: user, rules: rules, account: account}
+	client := LambdaClient{invoker: lambda.NewFromConfig(cfg), user: user, rules: rules, account: account}
 	return &client, nil
 }
