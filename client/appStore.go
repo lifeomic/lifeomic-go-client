@@ -47,7 +47,7 @@ type AppStoreClient struct {
 	client     graphqlClient
 }
 
-type app struct {
+type App struct {
 	Name          string
 	Description   string
 	AuthorDisplay string
@@ -59,14 +59,14 @@ func (self *AppStoreClient) Gql(query string, variables map[string]interface{}) 
 	return self.client.Gql(self.graphqlUrl, query, variables)
 }
 
-func (self *AppStoreClient) GetAppStoreListing(id string) (*app, error) {
+func (self *AppStoreClient) GetAppStoreListing(id string) (*App, error) {
 	res, err := self.Gql(GET_APP_STORE_LISTING, map[string]interface{}{"id": id})
 	if err != nil {
 		return nil, err
 	}
 
 	var data struct {
-		App app
+		App App
 	}
 	err = mapstructure.Decode(res, &data)
 	if err != nil {
@@ -75,7 +75,7 @@ func (self *AppStoreClient) GetAppStoreListing(id string) (*app, error) {
 	return &data.App, nil
 }
 
-type appStoreCreate struct {
+type AppStoreCreate struct {
 	Name          string
 	AuthorDisplay string
 	Url           string
@@ -83,7 +83,7 @@ type appStoreCreate struct {
 	Image         string
 }
 
-func (self *AppStoreClient) CreateAppStoreListing(params appStoreCreate) (*string, error) {
+func (self *AppStoreClient) CreateAppStoreListing(params AppStoreCreate) (*string, error) {
 	res, err := self.Gql(CREATE_APP_STORE_LISTING, map[string]interface{}{"input": map[string]string{
 		"name":          params.Name,
 		"authorDisplay": params.AuthorDisplay,
@@ -107,7 +107,7 @@ func (self *AppStoreClient) CreateAppStoreListing(params appStoreCreate) (*strin
 	return &data.CreateWebApp.Id, nil
 }
 
-func (self *AppStoreClient) EditAppStoreListing(id string, params appStoreCreate) error {
+func (self *AppStoreClient) EditAppStoreListing(id string, params AppStoreCreate) error {
 	res, err := self.Gql(EDIT_APP_STORE_LISTING, map[string]interface{}{
 		"id": id,
 		"edits": map[string]string{

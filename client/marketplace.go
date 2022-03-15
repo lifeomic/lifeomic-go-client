@@ -85,7 +85,7 @@ const FINALIZE_IMAGE_UPLOAD = `
   }
 `
 
-type appTileModule struct {
+type AppTileModule struct {
 	Title       string
 	Description string
 	Version     string
@@ -99,13 +99,13 @@ type appTileModule struct {
 	}
 }
 
-func (self *MarketplaceClient) GetAppTileModule(id string) (*appTileModule, error) {
+func (self *MarketplaceClient) GetAppTileModule(id string) (*AppTileModule, error) {
 	res, err := self.Gql(GET_PUBLISHED_APP_TILE_MODULE, map[string]interface{}{"id": id})
 	if err != nil {
 		return nil, err
 	}
 	var data struct {
-		MyModule *appTileModule
+		MyModule *AppTileModule
 	}
 	err = mapstructure.Decode(res, &data)
 	if err != nil {
@@ -114,7 +114,7 @@ func (self *MarketplaceClient) GetAppTileModule(id string) (*appTileModule, erro
 	return data.MyModule, nil
 }
 
-type appTileCreate struct {
+type AppTileCreate struct {
 	Name           string
 	Description    string
 	Image          string
@@ -216,7 +216,7 @@ func (self *MarketplaceClient) AttachImageToDraftModule(moduleId string, image s
 	return err
 }
 
-func (self *MarketplaceClient) CreateAppTileDraftModule(params appTileCreate) (*string, error) {
+func (self *MarketplaceClient) CreateAppTileDraftModule(params AppTileCreate) (*string, error) {
 	res, err := self.Gql(CREATE_DRAFT_MODULE, map[string]interface{}{"input": map[string]interface{}{
 		"title":       params.Name,
 		"description": params.Description,
@@ -272,7 +272,7 @@ func (self *MarketplaceClient) CreateAppTileDraftModule(params appTileCreate) (*
 	return &moduleId, nil
 }
 
-func (self *MarketplaceClient) PublishNewAppTileModule(params appTileCreate) (*string, error) {
+func (self *MarketplaceClient) PublishNewAppTileModule(params AppTileCreate) (*string, error) {
 	draftModuleId, err := self.CreateAppTileDraftModule(params)
 	if err != nil {
 		return nil, err
