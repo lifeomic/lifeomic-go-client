@@ -1,8 +1,12 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
@@ -130,4 +134,51 @@ func testParseUri(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected an error")
 	}
+}
+
+func TestDo(t *testing.T) {
+	respPayload := responsePayload{
+		Body:       "{ \"data\": { \"result\": true } }",
+		StatusCode: 200,
+	}
+
+	mock := MockInvoker{
+		response: &lambda.InvokeOutput{
+			Payload: []byte("{ \"body\": \"{ \\\"data\\\": { \\\"result\\\": true } }\"}"),
+		},
+	}
+
+	client := &LambdaClient{
+		invoker: &mock,
+		user:    "test-user",
+		account: "test-account",
+		rules:   map[string]bool{"publishContent": true},
+	}
+
+	req := &http.Request{
+		Method: "POST",
+		URL: &url.URL{
+			Scheme: "some-service",
+			Opaque: "deployed/graphql",
+		},
+		Body: ioutil.NopCloser(bytes.NewBufferString(respPayload.Body)),
+		Header: map[string][]string{
+			"Content-Type": {"application/json"},
+		},
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(respBody) != respPayload.Body {
+		t.Fatalf("expected returned body to equal mocked body, returned: %v, expected %v", string(respBody), respPayload.Body)
+	}
+
 }
