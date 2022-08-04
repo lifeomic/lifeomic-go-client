@@ -147,6 +147,9 @@ func (c *LambdaClient) Do(req *http.Request) (*http.Response, error) {
 	}
 
 	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return nil, err
+	}
 
 	data, err := json.Marshal(payload{
 		Headers:               headers,
@@ -155,6 +158,9 @@ func (c *LambdaClient) Do(req *http.Request) (*http.Response, error) {
 		Path:                  *path,
 		Body:                  string(body),
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	lambdaResponse, err := c.invoker.Invoke(req.Context(), &lambda.InvokeInput{
 		FunctionName: functionName,
@@ -168,13 +174,12 @@ func (c *LambdaClient) Do(req *http.Request) (*http.Response, error) {
 	// attempt to convert lambda response into http Response
 	var respPayload responsePayload
 	err = json.Unmarshal(lambdaResponse.Payload, &respPayload)
-
 	if err != nil {
 		return nil, err
 	}
 
 	resp := http.Response{
-		Body:       ioutil.NopCloser(bytes.NewBuffer([]byte(respPayload.Body))),
+		Body:       ioutil.NopCloser(bytes.NewBufferString(respPayload.Body)),
 		StatusCode: respPayload.StatusCode,
 		Header:     toHeader(respPayload.Headers),
 	}
