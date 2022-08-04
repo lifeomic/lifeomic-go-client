@@ -21,7 +21,7 @@ mutation MockMutation($var: String!) {
 `
 
 func TestBuildGqlQuery(t *testing.T) {
-	client := Client{
+	client := LambdaClient{
 		rules: map[string]bool{
 			"testRule": true,
 		},
@@ -80,7 +80,7 @@ func TestGql(t *testing.T) {
 			Payload: []byte("{ \"body\": \"{ \\\"data\\\": { \\\"result\\\": true }}\"}"),
 		},
 	}
-	client := Client{
+	client := LambdaClient{
 		invoker: &mock,
 	}
 
@@ -148,7 +148,7 @@ func TestDo(t *testing.T) {
 		},
 	}
 
-	client := &Client{
+	client := &LambdaClient{
 		invoker: &mock,
 		user:    "test-user",
 		account: "test-account",
